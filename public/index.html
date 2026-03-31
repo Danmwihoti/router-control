@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Remote router control panel - Restart your router from any device">
+  <title>Router Control Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      padding: 20px;
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-width: 450px;
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    .router-name {
+      font-size: 1.2em;
+      opacity: 0.9;
+      margin-bottom: 30px;
+      font-weight: 300;
+    }
+    
+    .status-card {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .status {
+      font-size: 1.1em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    .status.online .status-indicator {
+      background: #2ed573;
+      box-shadow: 0 0 20px rgba(46, 213, 115, 0.5);
+    }
+    
+    .status.offline .status-indicator {
+      background: #ff4757;
+      box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+    }
+    
+    .status.checking .status-indicator {
+      background: #ffa502;
+      box-shadow: 0 0 20px rgba(255, 165, 2, 0.5);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .router-info {
+      font-size: 0.9em;
+      opacity: 0.8;
+      margin-top: 10px;
+    }
+    
+    button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 20px 50px;
+      font-size: 1.2em;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      font-family: inherit;
+      width: 100%;
+    }
+    
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .countdown {
+      font-size: 4em;
+      margin: 30px 0;
+      font-weight: 700;
+      display: none;
+      color: #2ed573;
+      text-shadow: 0 0 30px rgba(46, 213, 115, 0.5);
+    }
+    
+    .message {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .message.show {
+      display: block;
+    }
+    
+    .message.success {
+      background: rgba(46, 213, 115, 0.3);
+      border: 1px solid rgba(46, 213, 115, 0.5);
+    }
+    
+    .message.error {
+      background: rgba(255, 71, 87, 0.3);
+      border: 1px solid rgba(255, 71, 87, 0.5);
+    }
+    
+    .message.warning {
+      background: rgba(255, 165, 2, 0.3);
+      border: 1px solid rgba(255, 165, 2, 0.5);
+    }
+    
+    .footer {
+      margin-top: 30px;
+      font-size: 0.9em;
+      opacity: 0.7;
+    }
+    
+    .footer a {
+      color: white;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    
+    .last-check {
+      font-size: 0.85em;
+      opacity: 0.7;
+      margin-top: 10px;
+    }
+    
+    @media (max-width: 500px) {
+      .container {
+        padding: 30px 20px;
+      }
+      
+      h1 {
+        font-size: 2em;
+      }
+      
+      button {
+        padding: 18px 40px;
+        font-size: 1.1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌐 Router Control</h1>
+    <div class="router-name" id="routerName">Loading...</div>
+    
+    <div class="status-card">
+      <div class="status checking" id="status">
+        <span class="status-indicator"></span>
+        <span id="statusText">Checking...</span>
+      </div>
+      <div class="router-info" id="routerInfo"></div>
+      <div class="last-check" id="lastCheck"></div>
+    </div>
+    
+    <button id="restartBtn" onclick="restartRouter()">
+      🔄 Restart Router
+    </button>
+    
+    <div class="countdown" id="countdown"></div>
+    
+    <div class="message" id="message"></div>
+    
+    <div class="footer">
+      Made with ❤️ by <a href="https://github.com/Danmwihoti" target="_blank">Daniel Mwihoti</a>
+    </div>
+  </div>
+
+  <script>
+    let statusCheckInterval;
+    let countdownInterval;
+    
+    // Check router status
+    async function checkStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        const statusEl = document.getElementById('status');
+        const statusText = document.getElementById('statusText');
+        const routerInfo = document.getElementById('routerInfo');
+        const lastCheck = document.getElementById('lastCheck');
+        
+        if (data.online) {
+          statusEl.className = 'status online';
+          statusText.textContent = 'Router Online';
+        } else {
+          statusEl.className = 'status offline';
+          statusText.textContent = 'Router Offline';
+        }
+        
+        routerInfo.textContent = `IP: ${data.ip}`;
+        
+        const checkTime = new Date(data.timestamp);
+        lastCheck.textContent = `Last checked: ${checkTime.toLocaleTimeString()}`;
+      } catch (error) {
+        const statusEl = document.getElementById('status');
+        const statusText = document.getElementById('statusText');
+        statusEl.className = 'status offline';
+        statusText.textContent = 'Cannot check status';
+        console.error('Status check failed:', error);
+      }
+    }
+    
+    // Get router info
+    async function getInfo() {
+      try {
+        const res = await fetch('/api/info');
+        const data = await res.json();
+        document.getElementById('routerName').textContent = data.router.ip;
+      } catch (error) {
+        console.error('Info fetch failed:', error);
+      }
+    }
+    
+    // Restart router
+    async function restartRouter() {
+      const btn = document.getElementById('restartBtn');
+      const msg = document.getElementById('message');
+      const countdownEl = document.getElementById('countdown');
+      
+      if (!confirm('⚠️ Are you sure you want to restart the router?\n\nInternet will be down for approximately 60-90 seconds.')) {
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Restarting...';
+      msg.className = 'message';
+      msg.style.display = 'none';
+      
+      try {
+        const res = await fetch('/api/restart', { method: 'POST' });
+        const data = await res.json();
+        
+        if (data.success) {
+          msg.className = 'message success show';
+          msg.innerHTML = `✅ ${data.message}<br><small>Method: ${data.method}</small>`;
+          
+          // Start countdown
+          countdownEl.style.display = 'block';
+          let seconds = data.estimatedDowntime || 60;
+          
+          countdownInterval = setInterval(() => {
+            countdownEl.textContent = seconds;
+            seconds--;
+            
+            if (seconds < 0) {
+              clearInterval(countdownInterval);
+              countdownEl.style.display = 'none';
+              btn.disabled = false;
+              btn.textContent = '🔄 Restart Router';
+              checkStatus();
+            }
+          }, 1000);
+        } else {
+          msg.className = 'message error show';
+          msg.innerHTML = `❌ ${data.message}`;
+          if (data.note) {
+            msg.innerHTML += `<br><small>${data.note}</small>`;
+          }
+          btn.disabled = false;
+          btn.textContent = '🔄 Restart Router';
+        }
+      } catch (error) {
+        msg.className = 'message error show';
+        msg.textContent = '❌ Error: ' + error.message;
+        btn.disabled = false;
+        btn.textContent = '🔄 Restart Router';
+      }
+    }
+    
+    // Initialize
+    getInfo();
+    checkStatus();
+    
+    // Check status every 30 seconds
+    statusCheckInterval = setInterval(checkStatus, 30000);
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (statusCheckInterval) clearInterval(statusCheckInterval);
+      if (countdownInterval) clearInterval(countdownInterval);
+    });
+  </script>
+</body>
+</html>
